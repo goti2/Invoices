@@ -1,137 +1,26 @@
-var express = require('express'),
-    bodyParser = require('body-parser'),
-    http = require('http'),
-    path = require('path'),
-    Sequelize = require('sequelize'),
-    _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const http = require('http');
+const path = require('path');
+const config = require('config');
+const _ = require('lodash');
 
 
-sequelize = new Sequelize('sqlite://' + path.join(__dirname, 'invoices.sqlite'), {
-  dialect: 'sqlite',
-  storage: path.join(__dirname, 'invoices.sqlite')
-});
+const Customer = require('./entities/Customer');
+const Invoice = require('./entities/Invoice');
+const Product = require('./entities/Product');
+const InvoiceItem = require('./entities/InvoiceItem');
 
-Customer = sequelize.define('customers', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: Sequelize.STRING
-  },
-  address: {
-    type: Sequelize.STRING
-  },
-  phone: {
-    type: Sequelize.STRING
-  }
-});
 
-Product = sequelize.define('products', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: Sequelize.STRING
-  },
-  price: {
-    type: Sequelize.DECIMAL
-  }
-});
+const app = express();
 
-Invoice = sequelize.define('invoices', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  customer_id: {
-    type: Sequelize.INTEGER
-  },
-  discount: {
-    type: Sequelize.DECIMAL
-  },
-  total: {
-    type: Sequelize.DECIMAL
-  }
-});
 
-InvoiceItem = sequelize.define('invoice_items', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  invoice_id: {
-    type: Sequelize.INTEGER
-  },
-  product_id: {
-    type: Sequelize.INTEGER
-  },
-  quantity: {
-    type: Sequelize.DECIMAL
-  }
-});
-
-sequelize.sync().then(function() {
-  Customer.create({
-    name: "Mark Benson",
-    address: "353 Rochester St, Rialto FL 43250",
-    phone: "555-534-2342"
-  });
-
-  Customer.create({
-    name: "Bob Smith",
-    address: "215 Market St, Dansville CA 94325",
-    phone: "555-534-2342"
-  });
-
-  Customer.create({
-    name: "John Draper",
-    address: "890 Main St, Fontana IL 31450",
-    phone: "555-534-2342"
-  });
-
-  Product.create({
-    name: "Parachute Pants",
-    price: 29.99
-  });
-
-  Product.create({
-    name: "Phone Holder",
-    price: 9.99
-  });
-
-  Product.create({
-    name: "Pet Rock",
-    price: 5.99
-  });
-
-  Product.create({
-    name: "Egg Timer",
-    price: 15.99
-  });
-
-  Product.create({
-    name: "Neon Green Hat",
-    price: 21.99
-  });
-
-}).catch(function(e) {
-  console.log("ERROR SYNCING WITH DB", e);
-});
-
-var app = module.exports = express();
-app.set('port', process.env.PORT || 8000);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// CUSTOMERS API
 
+// CUSTOMERS API
 app.route('/api/customers')
   .get(function(req, res) {
     Customer.findAll().then(function(customers) {
@@ -166,8 +55,8 @@ app.route('/api/customers/:customer_id')
         });
     });
 
-// PRODUCTS API
 
+// PRODUCTS API
 app.route('/api/products')
   .get(function(req, res) {
     Product.findAll().then(function(products) {
@@ -204,7 +93,6 @@ app.route('/api/products/:product_id')
 
 
 // INVOICES API
-
 app.route('/api/invoices')
     .get(function(req, res) {
         Invoice.findAll().then(function(invoices) {
@@ -241,7 +129,6 @@ app.route('/api/invoices/:invoice_id')
 
 
 // INVOICE ITEMS API
-
 app.route('/api/invoices/:invoice_id/items')
     .get(function(req, res) {
         InvoiceItem.findAll({where: { invoice_id: req.params.invoice_id }}).then(function(invoice_items) {
@@ -286,6 +173,9 @@ app.get('*', function(req, res) {
 });
 
 // Starting express server
-http.createServer(app).listen(app.get('port'), function () {
-  console.log('Express server listening on port ' + app.get('port'));
+http.createServer(app).listen(config.get('app.port'), function () {
+  console.log('Express server listening on port ' + config.get('app.port'));
 });
+
+
+module.exports = app;

@@ -4,9 +4,10 @@
   "private": true,
   "dependencies": {
     "body-parser": "1.15.0",
+    "config": "^1.26.2",
     "express": "~4.13.4",
+    "lodash": "latest",
     "sequelize": "^3.20.0",
-    "sqlite3": "latest",
-    "lodash": "latest"
+    "sqlite3": "latest"
   }
 }

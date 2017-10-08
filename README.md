@@ -1,10 +1,7 @@
-# Dependencies
-
-- sqlite3
-- node
-- npm
-
 # Getting Started
+
+###### [Optional] Set ENVironment
+`export NODE_ENV=[your environment]`
 
 ###### Install npm dependencies
 `npm install`
